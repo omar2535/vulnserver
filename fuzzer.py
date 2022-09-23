@@ -1,9 +1,16 @@
 import struct
 import socket
 import sys
+
+from pwn import *
 from struct import pack
 
-buf = b"A" * 1000
+
+buf = b""
+buf += b"STATS LMAOOO\n"
+
+
+buf += b"EXIT\n\n"
 
 def main():
   if len(sys.argv) != 2:
@@ -12,10 +19,16 @@ def main():
 
   server = sys.argv[1]
   port = 9999
-  s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-  s.connect((server, port))
-  s.send(buf)
-  s.close()
+  
+  # Receive new line "Welcome to vulnerable server! ect."
+  conn = remote("192.168.30.128", 9999)
+  conn.recvline()
+  
+  conn.sendline(b'STATS LMAOOOO')
+  
+  conn.sendline(b'EXIT')
+
+  conn.close()
   print("[+] Packet sent")
 
 
